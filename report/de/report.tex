@@ -1,0 +1,429 @@
+% !TeX program = lualatex
+\documentclass[12pt,fleqn,parskip=half,twoside,toc=index,headings=small,a4paper]{scrreprt}
+\input{header.tex}
+
+\usepackage{comment}
+
+\begin{document}
+	\input{titlepage}
+	\microtypesetup{protrusion=false}
+	\tableofcontents
+	\microtypesetup{protrusion=true}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\raggedbottom
+	\chapter{Aufgabenstellung}
+	Im Rahmen des Mikrocomputer-Praktikums soll mit \textsmaller{PWM} und \textsmaller{LED}s ansteuern.
+%	
+	\section{Peripherie}
+	Von der \textsmaller{MCU} sind folgende Aktoren
+	\begin{itemize}[noitemsep]
+		\item ...
+		\item ...
+		\item ...
+	\end{itemize}
+	zu steuern.
+	
+	Als Sensoren sind
+	\begin{itemize}[noitemsep]
+		\item ...
+		\item ...
+	\end{itemize}
+	auszuwerten.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\chapter{Schaltungsentwurf}
+	\section{Blockdiagramm}
+	\begin{figure}[h]
+		\centering
+		\tikzstyle{block} = [draw, rectangle, 
+		minimum height=3em, minimum width=6em, very thick]
+		
+		% The block diagram code is probably more verbose than necessary
+		\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+		
+		%\draw[help lines,step=5mm,gray!20] (0,0) grid (15,10);
+		\node[block] (mcu) at (5,3) {CC2650};
+		
+		\node[block, above right = 0.5cm and 0.5cm of mcu] (L298) {H-Brücke};
+		\node[block, above = 0.6cm of L298] (shu) {Shunt};
+		\node[block, above = 0.6cm of shu] (mot) {\textsmaller{DC}-Motor};
+		
+		\node[block, left = 0.5cm of shu] (opa) {OpAmp};
+		\node[block, left = 1cm of mcu] (reg) {Schieberegister};	
+		
+		\node[block, below = 0.6cm of reg] (led) {LEDs};
+		\node[block, below = 0.6cm of mcu] (taster) {Taster};
+		
+		\node[block, above = 0.6cm of reg] (7Se) {7 Segment};
+		
+		
+		\draw[thick, ->, shorten >=1mm,shorten <=1mm] (mcu.east) -| (L298.south) node [near start, xshift=3mm] {\small PWM};
+		
+		\draw[thick, ->, shorten >=1mm,shorten <=1mm] (mcu.west) -- (reg) node [near start, xshift=-2mm] {\small SPI};
+		
+		\draw[thick, ->, shorten >=1mm,shorten <=1mm] (reg) -- (led);
+		\draw[thick, ->, shorten >=1mm,shorten <=1mm] (reg) -- (7Se);
+		\draw[thick, <-, shorten >=1mm,shorten <=1mm] (mcu) -- (taster);	
+		
+		\draw[thick, <-, shorten <=1mm] (mcu.north) -- (opa.south) node [near start, xshift=3mm, yshift=10mm, rotate=90] {\small analog};
+		
+		\draw[thick, ->, shorten <=1mm] (L298) -- (shu);	
+		\draw[thick, ->, shorten >=1mm] (shu) -- (mot);	
+		\draw[thick, ->, shorten >=1mm] (shu) -- (opa);	
+		
+		\end{tikzpicture}
+		\caption{Struktureller Aufbau ...}
+	\end{figure}
+	%
+	\section{Spannungsversorgung}
+	Das Board wird mit $0$ bis $\SI{12.5}{\volt}$ \textsmaller{DC} versorgt.
+	Eine Diode... .
+		%
+	\begin{figure}[h!]
+		\centering
+		%\includegraphics[width = \textwidth]{../images/somefile.pdf}
+		\caption{Spannungsversorgung}
+	\end{figure}
+	%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Vorwiderstände der Leuchtdioden}
+	Die \textsmaller{LED}s ...
+	Die Vorwiderstände ergeben sich gemäß:
+	\begin{equation}
+	R_{\text{LED}} = \frac{U_\text{CC} - U_\text{F}}{I_\text{F}}
+	\end{equation}
+	Die Leistung am Vorwiderstand ergibt sich aus:
+	\begin{equation}
+	P = (U_\text{CC} - U_\text{F}) \cdot I_\text{F} = R_{\text{LED}} \cdot I_\text{F}^2 
+	\end{equation}
+	Das Schieberegister hat eine Ausgangsspannung $U_\text{CC} = \SI{5}{\volt}$ und den Ausgangsstrom $I_\text{F} = \SI{20}{\milli\ampere}$.
+	Die Vorwiderstände sind in Tabelle~\ref{tab:Rled} aufgeführt.
+	%
+	\begin{table}[H]
+		\caption{Vorwiderstände in Abhängigkeit der Farbe mit der Leistung, die über dem Vorwiderstand abfällt. }
+		\label{tab:Rled}
+		\centering
+		\begin{tabular}{@{}lllll@{}}
+		\toprule
+			Farbe	& 	$U_\text{LED}$ ($\si{\volt}$)	& 	$R_\text{LED}$ ($\si{\ohm}$)	& 	$R_\text{LED,\,E24}$ ($\si{\ohm}$) 	&	$P_{R_\text{LED}}$ ($\si{\mW}$)		\\
+		\midrule
+			Rot		&	$\num{1.6}$			&	$\num{170}$		&	$\num{180}$			&	$\num{72}$	\\
+			Grün	&	$\num{2.1}$			&	$\num{145}$		&	$\num{150}$			&	$\num{60}$	\\
+			Gelb	&	$\num{2.2}$			&	$\num{140}$		&	$\num{150}$			&	$\num{60}$	\\
+			Blau	&	$\num{2.9}$			&	$\num{105}$		&	$\num{110}$			&	$\num{44}$	\\
+		\bottomrule
+		\end{tabular}
+	\end{table}
+	%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Abschätzung der Leistungsaufnahme}
+	...
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Entprellung}
+	\begin{figure}[h]
+		\centering
+		%\includegraphics[width = 0.6\textwidth]{../images/somefile.png}
+		\caption{Entprellung für einen mechanischen Taster -- fünf mal auf dem Board vorhanden.}
+	\end{figure}
+	Die Entprellung der mechanischen Taster ...
+	
+	Zu beachten ist, dass bei geschlossenem Taster ein Strom von $\SI{0.0}{\mA}$ dauerhaft über $R_{1}$ fließt.
+	%
+	\subsection*{Dimensionierung}
+	Der Kondensator wurde mit $C=\SI{0}{\nano\farad}$ und der Widerstand mit $R_1 = \SI{0}{\kilo\ohm}$ gewählt.
+	Die Zeitkonstante beträgt damit
+	\begin{equation}
+		\tau = R \cdot C = \SI{10}{\us}.
+	\end{equation}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Ansteuerung des Motors}
+	\begin{figure}[h!]
+		\centering
+		%\includegraphics[width = \textwidth]{../images/...}
+		\caption{Motorsteuerung und Strommessung.}\label{Motor}
+	\end{figure}
+	Die beiden \textsmaller{DC}-Motoren... 
+	
+	Zur Messung des Motorstroms ... Shunt-Widerstand mit $R=\SI{0.0}{\ohm}$ geleitet.
+	... $I=\SI{1}{\A}$ ...
+	\begin{equation}
+		P=I^2\cdot R=\SI{0.0}{\W}
+	\end{equation}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Pinbelegung des STM32 L476RG}
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[scale=0.40,
+		pin/.style={draw,rectangle,minimum width=1.5em,font=\tiny, rounded corners=1pt, fill=white}
+		]
+		\draw[ultra thick, rounded corners=2pt] (0,0) rectangle (23.3,23.3);
+		\draw[rounded corners=1pt] (0.4,17.6) rectangle (0.8,17.2);
+		\draw[rounded corners=1pt, dashed] (2,2) rectangle (21.3,21.3);
+		\node at (11.565,11.565){STM32 L476};
+		
+		% Main trick: loop over the label numbers and then adjust their position
+		% in the tikzpicture using evaluate to calculate \y=y-coordinate of pin
+		\foreach \i/\desc [evaluate=\i as \y using (21.25-(\i-1)*1.3)]
+		in {1/{VBAT},
+			2/{PC13},
+			3/{PC14},
+			4/{PC15},
+			5/{PH0},
+			6/{PH1},
+			7/{NRST},
+			8/{PCO},
+			9/{PC1},
+			10/{PC2},
+			11/{PC3},
+			12/{VSS},
+			13/{VDD},
+			14/{PA0},
+			15/{PA1},
+			16/{PA2}}%
+		{
+			\draw node[pin,anchor=east] at (1.2,\y){$\i$};
+			\node[align=right,anchor=east] at (-0.4,\y){\footnotesize\desc};
+		}
+		\foreach \i/\desc [evaluate=\i as \x using (1.5+(\i-17)) * 1.3]
+		in {17/{PA3},
+			18/{VSS},
+			19/{VDD},
+			20/{PA4},
+			21/{PA5},
+			22/{PA6},
+			23/{PA7},
+			24/{PC4},
+			25/{PC5},
+			26/{PB0},
+			27/{PB1},
+			28/{PB2},
+			29/{PB10},
+			30/{PB11},
+			31/{VSS},
+			32/{VDD}%
+		}
+		{
+			\draw node[pin,anchor=east,rotate=90] at (\x,1.2){$\i$};
+			\node[align=right,anchor=east,rotate=90] at (\x,-0.4){\footnotesize\desc};
+		}
+		\foreach \i/\desc [evaluate=\i as \y using ((\i-33.15) * 1.3)+2]
+		in {33/{PB12},
+			34/{PB13},
+			35/{PB14},
+			36/{PB15},
+			37/{PC6},
+			38/{PC7},
+			39/{PC8},
+			40/{PC9},
+			41/{PA8},
+			42/{PA9},
+			43/{PA10},
+			44/{PA11},
+			45/{PA12},
+			46/{PA13},
+			47/{VSS},
+			48/{VDD}%
+		}
+		{
+			\draw node[pin,anchor=west] at (22.1,\y){$\i$};
+			\node[align=left,anchor=west] at (23.7,\y){\footnotesize\desc};
+		}
+		\foreach \i/\desc [evaluate=\i as \x using (25-(\i - 46.2)*1.3)]
+		in {49/{PA14},
+			50/{PA15},
+			51/{PC10},
+			52/{PC11},
+			53/{PC12},
+			54/{PD2},
+			55/{PB3},
+			56/{PB4},
+			57/{PB5},
+			58/{PB6},
+			59/{PB7},
+			60/{BOOT0},
+			61/{PB8},
+			62/{PB9},
+			63/{VSS},
+			64/{VDD}%
+		}
+		{
+			\draw node[pin,anchor=west,rotate=90] at (\x,22.1){$\i$};
+			\node[align=right,anchor=west,rotate=90] at (\x,23.7){\footnotesize\desc};
+		}
+		\end{tikzpicture}
+		\caption{Pinbelegung}
+	\end{figure}
+\begin{table}[H]
+	\caption{Pinbelegung des STM32 L476}
+	\renewcommand{\arraystretch}{1.0}
+	\centering
+	\begin{minipage}{.48\linewidth}
+		\begin{tabularx}{\linewidth}{@{}rllX@{}}
+			\toprule
+			Nr. & Name & Funktion \\
+			\midrule
+			1 	& VBAT\\
+			2 	& PC13 & B1 [Blue PushButton]\\
+			3 	& PC14 \\
+			4 	& PC15 \\
+			5 	& PH0 \\
+			6 	& PH1 \\
+			7 	& NRST & \\
+			8 	& PC0 & \\
+			9 	& PC1 & \\ 
+			10	& PC2 & \\
+			11	& PC3 & \\
+			12  & VSS & \\
+			13  & VDD & \\
+			14  & PA0 & \\
+			15  & PA1 & \\
+			16  & PA2 & \\ 
+			\midrule
+			17  & PA3  & \\
+			18  & VSS \\ 
+			19  & VDD & \\ 
+			20  & PA4 & \\ 
+			21  & PA5 & LD2 [green Led] \\ 
+			22  & PA6 \\ 
+			23  & PA7 & \\
+			24  & PC4 & \\ 
+			25  & PC5 & \\ 
+			26  & PB0  & \\ 
+			27  & PB1 \\ 
+			28  & PB2\\ 
+			29  & PB10 & \\
+			30  & PB11 & \\
+			31  & VSS & \\
+			32  & VDD & \\			
+			\bottomrule
+		\end{tabularx}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.48\linewidth}
+		\begin{tabularx}{\linewidth}{@{}rllX@{}}
+			\toprule
+			Nr. & Name & Funktion \\
+			\midrule
+			33 	& PB12 \\
+			34 	& PB13 &  \\
+			35 	& PB14 &  \\
+			36	& PB15 & \\
+			37 	& PC6 & \\
+			38 	& PC7 & \\
+			39 	& PC8 & \\
+			40 	& PC9 & \\
+			41 	& PA8 &  \\ 
+			42	& PA9 &  \\
+			43	& PA10 & \\
+			44  & PA11\\
+			45  & PA12 & \\
+			46  & PA13 & \\
+			47  & VSS & \\
+			48  & VDD & \\ 
+			\midrule
+			49  & PA14 & \\
+			50  & PA15 & \\ 
+			51  & PC10 & \\ 
+			52  & PC11 & \\ 
+			53  & PC12 & \\ 
+			54  & PD2 & \\ 
+			55  & PB3 & \\
+			56  & PB4 & \\ 
+			57  & PB5 & \\ 
+			58  & PB6\\ 
+			59  & PB7 & \\ 
+			60  & BOOT0 \\
+			61  & PB8 & \\
+			62  & PB9 & \\
+			63  & VSS & \\
+			64  & VDD & \\ 			
+			\bottomrule
+		\end{tabularx}%
+	\end{minipage}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\section{Layout}
+	\begin{figure}[h]
+		\centering
+		%\includegraphics[]{../images/topView.pdf}
+		\caption{Top-Layer des Boards von oben}
+	\end{figure}
+	\begin{figure}[h]
+		\centering
+		%\includegraphics[]{../images/bottomView.pdf}
+		\caption{Bottom-Layer des Boards von oben}
+	\end{figure}
+	\begin{figure}[h]
+		\centering
+		%\includegraphics[]{../images/topParts.pdf}
+		\caption{Board mit Bestückung von oben}
+	\end{figure}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Software}
+
+\section{Aufbau}
+	\begin{figure}[h]
+		\centering
+		%\includegraphics[width = 0.8\linewidth]{../images/softwarestructure.pdf}
+		\caption{Struktureller Aufbau der Software}
+		\label{fig:AufbauSoftware}
+	\end{figure}
+Zur Implementierung ...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Zustandsmaschine}
+Am besten in Form einer Tabelle:
+\begin{table}[H]
+\centering
+\caption{Zustandsübergänge...}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Zustand & Ereignis & Folgezustand \\
+\midrule
+\textsmaller{PREINIT, ERROR} & \textsmaller{CAN}-Msg. Init. & \textsmaller{ACTIVE}.init\\
+\cmidrule{1-3}
+\textsmaller{ACTIVE}& Overcurrent \& .grabbing & \textsmaller{IDLE}\\
+& Overcurrent \& .moving & \textsmaller{ERROR}\\
+& Undercurrent  & \textsmaller{ERROR}\\
+...\\
+\cmidrule{1-3}
+\textsmaller{IDLE, ACTIVE}& \textsmaller{CAN}-Msg. MoveRel & \textsmaller{ACTIVE}.moving\\
+& \textsmaller{CAN}-Msg. MoveAbs & \textsmaller{ACTIVE}.moving\\
+...\\
+\bottomrule
+\end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Quellcode in \LaTeX{}}
+\subsection{So geht's}
+Die \texttt{main}-Funktion ...
+\begin{lstlisting}[style=myC]
+// SPI
+Board_initSPI();
+
+SPI_Params_init(&spi_params);
+spi_params.transferMode = SPI_MODE_BLOCKING;
+spi_params.bitRate  = 4000000;
+spi_params.mode        = SPI_MASTER;
+spi_params.dataSize = 16;
+spi_params.transferTimeout = SPI_WAIT_FOREVER;
+spi_params.transferCallbackFxn = NULL;
+spi_handle = SPI_open(Board_SPI0, &spi_params);
+if (spi_handle) {
+    System_printf("SPI opened\r\n");
+} else {
+    System_printf("SPI did not open\r\n");
+}
+\end{lstlisting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Fazit}
+...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Errata}
+	Folgende Fehler:
+	\begin{itemize}
+		\item xxx
+		\item yyy
+		\item zzz
+	\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}

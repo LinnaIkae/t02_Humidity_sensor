@@ -1,0 +1,117 @@
+EESchema Schematic File Version 4
+LIBS:hwpboard-cache
+EELAYER 26 0
+EELAYER END
+$Descr A3 16535 11693
+encoding utf-8
+Sheet 1 1
+Title "Your Module here"
+Date ""
+Rev ""
+Comp "Your team here"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:Barrel_Jack_Switch J1
+U 1 1 5B990E83
+P 950 1250
+F 0 "J1" H 1005 1567 50  0000 C CNN
+F 1 "Barrel_Jack_Switch" H 1005 1476 50  0000 C CNN
+F 2 "HWP:BarrelJack_Horizontal_CustomHWP" H 1000 1210 50  0001 C CNN
+F 3 "~" H 1000 1210 50  0001 C CNN
+	1    950  1250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 5B991004
+P 1350 1550
+F 0 "#PWR0101" H 1350 1300 50  0001 C CNN
+F 1 "GND" H 1355 1377 50  0000 C CNN
+F 2 "" H 1350 1550 50  0001 C CNN
+F 3 "" H 1350 1550 50  0001 C CNN
+	1    1350 1550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1350 1350 1350 1550
+$Comp
+L Connector_Generic:Conn_01x01 J2
+U 1 1 5BAB792F
+P 10250 10750
+F 0 "J2" H 10330 10792 50  0000 L CNN
+F 1 "Conn_01x01" H 10330 10701 50  0000 L CNN
+F 2 "HWP:MountingHole_4.1mm_M4_ISO14580_Pad" H 10250 10750 50  0001 C CNN
+F 3 "~" H 10250 10750 50  0001 C CNN
+	1    10250 10750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 J4
+U 1 1 5BAB7A7C
+P 11100 10750
+F 0 "J4" H 11180 10792 50  0000 L CNN
+F 1 "Conn_01x01" H 11180 10701 50  0000 L CNN
+F 2 "HWP:MountingHole_4.1mm_M4_ISO14580_Pad" H 11100 10750 50  0001 C CNN
+F 3 "~" H 11100 10750 50  0001 C CNN
+	1    11100 10750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 J3
+U 1 1 5BAB7AA2
+P 10250 10950
+F 0 "J3" H 10330 10992 50  0000 L CNN
+F 1 "Conn_01x01" H 10330 10901 50  0000 L CNN
+F 2 "HWP:MountingHole_4.1mm_M4_ISO14580_Pad" H 10250 10950 50  0001 C CNN
+F 3 "~" H 10250 10950 50  0001 C CNN
+	1    10250 10950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 J5
+U 1 1 5BAB7AE2
+P 11100 10950
+F 0 "J5" H 11180 10992 50  0000 L CNN
+F 1 "Conn_01x01" H 11180 10901 50  0000 L CNN
+F 2 "HWP:MountingHole_4.1mm_M4_ISO14580_Pad" H 11100 10950 50  0001 C CNN
+F 3 "~" H 11100 10950 50  0001 C CNN
+	1    11100 10950
+	1    0    0    -1  
+$EndComp
+Text Notes 10500 10550 0    50   ~ 0
+Mounting Holes
+Wire Notes Line
+	9950 10450 9950 11100
+Wire Notes Line
+	9950 11100 11700 11100
+Wire Notes Line
+	11700 11100 11700 10450
+Wire Notes Line
+	11700 10450 9950 10450
+Wire Wire Line
+	1350 1350 1250 1350
+NoConn ~ 10050 10750
+NoConn ~ 10050 10950
+NoConn ~ 10900 10750
+NoConn ~ 10900 10950
+$Comp
+L power:+5V #PWR01
+U 1 1 5BAE8089
+P 1550 1100
+F 0 "#PWR01" H 1550 950 50  0001 C CNN
+F 1 "+5V" H 1565 1273 50  0000 C CNN
+F 2 "" H 1550 1100 50  0001 C CNN
+F 3 "" H 1550 1100 50  0001 C CNN
+	1    1550 1100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1250 1150 1550 1150
+Wire Wire Line
+	1550 1150 1550 1100
+NoConn ~ 1250 1250
+$EndSCHEMATC

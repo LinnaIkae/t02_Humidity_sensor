@@ -1,0 +1,12 @@
+#Ignore Eclipse workspace
+.jxbrowser-data
+.metadata
+.tempFiles
+
+#Ignore stuff in project's subdirs
+/**/Debug
+/**/Release
+
+#Not really sure
+#/**/.settings/
+#/**/.mxproject

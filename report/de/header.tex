@@ -1,0 +1,195 @@
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[  
+    vmarginratio=1:2, %Verhältnis der oben/unten Seitenränder zur automatischen Berechnung
+    paper=a4paper,
+    %left=3cm,
+    %right=3cm,
+    inner=3.5cm, % mittlerer Rand
+    outer=2.5cm, % äußerer Rand
+    top=2.0cm,
+    bottom=2.5cm,
+    %marginparwidth=2.3cm, % Breite des Marginpars
+    includeheadfoot, % Kopfzeile in Berechnung einbeziehen
+    %includemp % Marginpar in die Berechnung mit einbeziehen
+    %showframe=true,
+]{geometry}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[ngerman]{babel}
+\usepackage{mathpazo}
+\usepackage[euler-digits]{eulervm}
+
+\usepackage[no-math]{fontspec} %no-math
+%\usepackage{fontspec}
+\usepackage{amsmath}
+%\usepackage[math-style=upright]{unicode-math}
+%\setmathfont{TeX Gyre Pagella Math}
+%\setmathfont{Neo Euler}
+%\%setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Libertinus Math}
+%\defaultfontfeatures{SmallCapsFeatures={Renderer=Basic}}
+\setsansfont[Path =../fonts/,
+UprightFont = *-Regular,
+BoldFont = *-Bold,
+ItalicFont = *-Italic,
+BoldItalicFont = *-BoldItalic
+]{URWClassico}
+ 
+%\setmainfont[Path =./fonts/,
+%UprightFont = *-regular,
+%BoldFont = *-bold,
+%ItalicFont = *-italic,
+%BoldItalicFont = *-bolditalic]{texgyrepagella}
+
+\setmainfont[Path =../fonts/,
+UprightFont = *,
+BoldFont = *b,
+ItalicFont = *i,
+BoldItalicFont = *bi]{pala}
+
+\setmonofont[Path = ../fonts/,
+UprightFont = *-Regular,
+BoldFont = *-Bold,
+AutoFakeSlant,
+BoldItalicFeatures={FakeSlant}
+]{Inconsolata}
+
+\usepackage{MnSymbol}
+
+\usepackage[tracking=true]{microtype}
+\SetTracking[no ligatures]{encoding = *, shape = sc*}{150}
+\usepackage[
+pdfencoding=auto,
+colorlinks=true,
+linkcolor=black,
+citecolor=black,
+filecolor=black,
+urlcolor=black,
+bookmarks=true,
+bookmarksopen=true,
+bookmarksopenlevel=3,
+plainpages=false,
+pdfpagelabels=true,
+pdftitle={Praktikum Mikrocontroller},
+pdfauthor={},
+pdfsubject={}, % subject of the document
+pdfkeywords={}]{hyperref}
+\usepackage{mathtools}
+\usepackage{setspace}
+\spacing{1.2}
+\usepackage{enumitem}
+%\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\usetikzlibrary{pgfplots.groupplots} 
+\usetikzlibrary{plotmarks}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{calc}
+\usepackage{polynom}
+\polyset{style=C, div=:,vars=x}
+\usepackage{wrapfig}
+\usepackage[locale=DE]{siunitx}
+\DeclareSIUnit{\promille}{\text{\textperthousand}}
+%\DeclareSIUnit{\percent}{\text{\textpercent}}
+\DeclareSIUnit{\dBm}{dBm}
+\sisetup{
+	math-rm=\mathrm,
+	mode=math,
+	unitmode=text,
+    %detect-all,               %% Benutze gleiche Schriftarten wie im Text
+    group-digits=true,          %% Zifferngruppierung an/aus
+    group-separator=\, ,        %% Zeichen für Zifferngruppierung
+    group-minimum-digits=5     %% Ziffern ab # Ziffern gruppieren
+}
+\usepackage{relsize}
+\usepackage{cancel}
+\usepackage{nicefrac}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{lscape}
+\usepackage{here}
+\usepackage{selnolig}
+\nolig{Haupttask}{Haupt|task}
+\nolig{Starttemperatur}{Start|temperatur}
+\usepackage{scrpage2} 
+\setheadsepline{0.5pt}
+\clearscrheadings
+\clearscrplain                  
+\pagestyle{scrheadings}
+\automark[section]{chapter}
+%Nun die Befehle für die Kopf- und Fusszeileneinstellung. Der Befehl ist immer für beide Seitenstile (plain,headings) und hat immer das Format:
+%\Position[scrplain]{scrheadings}
+\ohead[]{\rightmark}
+\ofoot[\pagemark]{\pagemark}
+\renewcommand*{\headfont}{\normalfont\sffamily}
+\renewcommand*{\footfont}{\normalfont\sffamily}
+\renewcommand*{\pnumfont}{\normalfont\sffamily}
+
+%\usepackage{mathtools}
+\usetikzlibrary{positioning,shadows,backgrounds}
+% Wurzel mit Haken hinten (Dieser Hack hat eine Größenordnung nationaler Verschuldung)
+\usepackage{letltxmacro}
+\LetLtxMacro{\oldsqrt}{\sqrt}
+\renewcommand\sqrt[2][]{\mathpalette\DHLhksqrtA{{#1}{#2}}}
+\def\DHLhksqrtA#1#2{\setbox0=\hbox{$#1\DHLhksqrtB#2$}\dimen0=\ht0
+\advance\dimen0-0.15\ht0
+%0.15 ist das Mass fuer die Hakenlaenge, relativ zum Inhalt der Wurzel
+\setbox2=\hbox{\vrule height 0.98\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+\def\DHLhksqrtB#1#2{\def\a{#1}\def\b{}\ifx\a\b\oldsqrt{#2\,}\else\oldsqrt[#1]{#2\,}\fi}
+
+\newcommand{\remark}[1]{{\color{red}#1}}
+
+\usepackage[tocindentauto]{tocstyle}
+\usetocstyle{KOMAlike}
+
+\newsavebox{\myendhook}  % for the tabulars
+\makeatletter
+\def\tagform@#1{{(\maketag@@@{\ignorespaces#1\unskip\@@italiccorr)}%
+		\makebox[0pt][r]{%  after  the  equation  number
+			\makebox[0.4\textwidth][l]{\usebox{\myendhook}}%
+		}%
+		\global\sbox{\myendhook}{}%  clear  box  content
+	}%
+}
+\makeatother
+
+\usepackage{ncccomma} %Komma als Dezimaltrennzeichen
+\usepackage{url}
+
+\addtokomafont{disposition}{\boldmath}
+\newcommand{\abs}[1]{\ensuremath{\left\vert#1\right\vert}}
+\usepackage[europeanresistors]{circuitikz}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\usepackage{listings}
+\lstdefinestyle{myC}{ %
+	columns=fullflexible,
+  language=C,                  % the language of the code
+  basicstyle=\footnotesize\ttfamily\color{black},       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{black},  % the style that is used for the line-numbers
+  stepnumber=5,firstnumber=1,numberfirstline,
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=none,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=4,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=true,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\bfseries\color{black},          % keyword style
+  commentstyle=\itshape\color{gray},       % comment style
+  stringstyle=\color{gray},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add a comment within your code
+  morekeywords={uint8_t,uint16_t,uint32_t},               % if you want to add more keywords to the set
+  lineskip={1pt}
+}

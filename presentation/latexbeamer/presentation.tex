@@ -1,0 +1,64 @@
+\documentclass[aspectratio=169]{beamer}
+ 
+%\usepackage[utf8]{inputenc}
+%\usetheme{Dresden} 
+\usetheme{metropolis} 
+%\usecolortheme{dolphin}
+
+%Information to be included in the title page:
+\title{Sample title}
+\author{Anonymous}
+\institute{ShareLaTeX}
+\date{2018}
+ 
+\usepackage{mnsymbol}
+\usepackage{fontspec}
+
+\setsansfont[Path = ./fonts/,
+UprightFont = *-Regular,
+BoldFont = *-Bold,
+ItalicFont = *-Italic,
+BoldItalicFont = *-BoldItalic
+]{FiraSans}
+
+\setmonofont[Path = ./fonts/,
+UprightFont = *-Regular,
+BoldFont = *-Bold,
+%ItalicFont = *-Italic,
+%BoldItalicFont = *-BoldItalic
+]{FiraMono}
+\begin{document}
+ 
+\frame{\titlepage}
+ 
+\begin{frame}
+\frametitle{Sample frame title}
+\begin{columns}[t]
+  \begin{column}{0.5\linewidth}
+     Two\\lines.
+  \end{column}
+  \begin{column}{0.5\linewidth}
+    One line (but aligned).
+  \end{column}
+\end{columns}
+
+This is a text in first frame. This is a text in first frame. This is a text in first frame.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Math example}
+\begin{columns}[t]
+  \begin{column}{0.5\linewidth}
+     Math formula together with Fira
+  \end{column}
+  \begin{column}{0.5\linewidth}
+    $f(x) = \sum_{x=0}^{j}m \cdot x + b$
+  \end{column}
+\end{columns}
+
+This is a text in first frame. This is a text in first frame. This is a text in first frame.
+\end{frame}
+
+\end{document}
+
