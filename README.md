@@ -6,18 +6,18 @@ Term: `Summer Term 2018`
 Team Members:   
 
 ``` 
-1 __________
+1 Leevi Karjalainen
 ```
 ``` 
-2 __________
+2 Martin K
 ```
 
 Team/Desk Number:
 ``` 
-__
+02
 ```
   
 Function Unit Name:
 ``` 
-__________
+Moisture sensor
 ```
