@@ -9,7 +9,7 @@ Team Members:
 1 Leevi Karjalainen
 ```
 ``` 
-2 Martin K
+2 Martin Kostal
 ```
 
 Team/Desk Number:
