@@ -157,7 +157,7 @@ U 1 1 5BD20ADA
 P 9900 3250
 F 0 "RotaryEncoder1" H 9900 3617 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 9900 3526 50  0000 C CNN
-F 2 "Rotary_Encoder:RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm" H 9750 3410 50  0001 C CNN
+F 2 "HWP:RotaryEncoder_Alps_EC12E-Switch_Vertical_H20mm_CircularMountingHoles" H 9750 3410 50  0001 C CNN
 F 3 "~" H 9900 3510 50  0001 C CNN
 	1    9900 3250
 	1    0    0    -1  
@@ -211,14 +211,6 @@ F 3 "" H 8250 5350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3900 3850 3350 3850
-Wire Wire Line
-	3900 3950 3350 3950
-Text Label 3350 3850 0    50   ~ 0
-ADC
-Text Label 3350 3950 0    50   ~ 0
-ADC
-Wire Wire Line
 	6100 2650 6650 2650
 Wire Wire Line
 	6100 2750 6650 2750
@@ -241,12 +233,8 @@ Wire Wire Line
 	9100 6050 9200 6050
 Wire Wire Line
 	9200 6050 9200 6250
-Text Label 9200 6050 0    50   ~ 0
-brightness
 Wire Wire Line
 	9100 5550 9300 5550
-Text Label 9550 5550 0    50   ~ 0
-contrast
 Wire Wire Line
 	8300 5350 8250 5350
 Wire Wire Line
@@ -290,31 +278,7 @@ Wire Wire Line
 Wire Wire Line
 	7650 7450 7650 7600
 Wire Wire Line
-	7400 7150 7900 7150
-Wire Wire Line
-	7400 7250 7900 7250
-Wire Wire Line
 	7400 7350 7900 7350
-Text Label 6650 3050 0    50   ~ 0
-LCD_out
-Text Label 6650 3150 0    50   ~ 0
-LCD_out
-Text Label 6650 3250 0    50   ~ 0
-LCD_out
-Text Label 6650 3350 0    50   ~ 0
-LCD_out
-Text Label 6650 3450 0    50   ~ 0
-LCD_out
-Text Label 6650 3550 0    50   ~ 0
-LCD_out
-Text Label 3400 4450 0    50   ~ 0
-LCD_out
-Text Label 3400 4550 0    50   ~ 0
-LCD_out
-Text Label 3400 4650 0    50   ~ 0
-LCD_out
-Text Label 3400 4750 0    50   ~ 0
-LCD_out
 Wire Wire Line
 	6100 5350 6700 5350
 Wire Wire Line
@@ -338,7 +302,7 @@ U 1 1 5BD347D1
 P 9850 2200
 F 0 "PushButton1" H 9850 2485 50  0000 C CNN
 F 1 "SW_Push" H 9850 2394 50  0000 C CNN
-F 2 "" H 9850 2400 50  0001 C CNN
+F 2 "HWP:SW_PUSH_6mm" H 9850 2400 50  0001 C CNN
 F 3 "" H 9850 2400 50  0001 C CNN
 	1    9850 2200
 	1    0    0    -1  
@@ -448,12 +412,6 @@ Text GLabel 6650 2650 2    50   Input ~ 0
 DAC0
 Text GLabel 9300 5550 2    50   Input ~ 0
 DAC0
-Text Label 6950 2650 0    50   ~ 0
-contrast
-Text Label 6950 2750 0    50   ~ 0
-brightness
-Text Label 5550 7100 0    50   ~ 0
-brightness
 Wire Wire Line
 	5550 7400 6100 7400
 Connection ~ 5550 7400
@@ -932,4 +890,12 @@ Wire Wire Line
 Wire Wire Line
 	10350 5750 10350 5950
 Connection ~ 10350 5950
+Wire Wire Line
+	3350 3850 3900 3850
+Wire Wire Line
+	3900 3950 3350 3950
+Wire Wire Line
+	7900 7150 7400 7150
+Wire Wire Line
+	7400 7250 7900 7250
 $EndSCHEMATC
