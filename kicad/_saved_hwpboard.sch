@@ -157,7 +157,7 @@ U 1 1 5BD20ADA
 P 9900 3250
 F 0 "RotaryEncoder1" H 9900 3617 50  0000 C CNN
 F 1 "Rotary_Encoder_Switch" H 9900 3526 50  0000 C CNN
-F 2 "Rotary_Encoder:RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm" H 9750 3410 50  0001 C CNN
+F 2 "HWP:RotaryEncoder_Alps_EC12E-Switch_Vertical_H20mm_CircularMountingHoles" H 9750 3410 50  0001 C CNN
 F 3 "~" H 9900 3510 50  0001 C CNN
 	1    9900 3250
 	1    0    0    -1  
@@ -338,7 +338,7 @@ U 1 1 5BD347D1
 P 9850 2200
 F 0 "PushButton1" H 9850 2485 50  0000 C CNN
 F 1 "SW_Push" H 9850 2394 50  0000 C CNN
-F 2 "" H 9850 2400 50  0001 C CNN
+F 2 "HWP:SW_PUSH_6mm" H 9850 2400 50  0001 C CNN
 F 3 "" H 9850 2400 50  0001 C CNN
 	1    9850 2200
 	1    0    0    -1  
