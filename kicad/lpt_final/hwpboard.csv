@@ -1,0 +1,13 @@
+"Id";"Designator";"Package";"Quantity";"Designation";"Supplier and ref";
+1;"LCD1";"WC1602A_no_mount";1;"RC1602A";;;
+2;"NUCBRD1";"ST_Morpho_Connector_STLink";1;"NUCLEO64";;;
+3;"J1";"BarrelJack_Horizontal_CustomHWP";1;"Barrel_Jack_Switch";;;
+4;"J2,J3,J4,J5";"MountingHole_4.1mm_M4_ISO14580_Pad";4;"Conn_01x01";;;
+5;"MoistureSensor1";"PinHeader_1x05_P2.54mm_Vertical";1;"Conn_01x05_Male";;;
+6;"PushButton1";"SW_PUSH_6mm";1;"SW_Push";;;
+7;"RotaryEncoder1";"RotaryEncoder_Alps_EC12E-Switch_Vertical_H20mm_CircularMountingHoles";1;"Rotary_Encoder_Switch";;;
+8;"Q1";"SOT-23";1;"BSS138";;;
+9;"C1,C2,C4";"C_0805_2012Metric_Pad1.15x1.40mm_HandSolder";3;"100n";;;
+10;"C3";"CP_Radial_D7.5mm_P2.50mm";1;"100u";;;
+11;"Rm0";"R_0805_2012Metric_Pad1.15x1.40mm_HandSolder";1;"100";;;
+12;"Rm1";"R_0805_2012Metric_Pad1.15x1.40mm_HandSolder";1;"100k";;;
