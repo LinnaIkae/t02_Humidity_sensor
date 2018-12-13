@@ -480,8 +480,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_BOARD_Pin|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
-                          |GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_BOARD_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_12, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
@@ -492,10 +492,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BLUE_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_BOARD_Pin PA8 PA9 PA10 
-                           PA11 PA12 */
-  GPIO_InitStruct.Pin = LED_BOARD_Pin|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
-                          |GPIO_PIN_11|GPIO_PIN_12;
+  /*Configure GPIO pins : LED_BOARD_Pin PA9 PA10 PA11 
+                           PA12 */
+  GPIO_InitStruct.Pin = LED_BOARD_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
+                          |GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -507,6 +507,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : rotary_left_Pin btn0_Pin btn1_Pin */
+  GPIO_InitStruct.Pin = rotary_left_Pin|btn0_Pin|btn1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PC6 PC7 PC8 PC9 */
   GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -514,15 +520,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : btn1_Pin */
-  GPIO_InitStruct.Pin = btn1_Pin;
+  /*Configure GPIO pin : rotaty_right_Pin */
+  GPIO_InitStruct.Pin = rotaty_right_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(btn1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(rotaty_right_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
@@ -534,10 +546,8 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	BaseType_t token = pdFALSE;
-  	uint16_t data = 1;
-  	if(GPIO_Pin == 8192) {
-  		xQueueSendToBackFromISR(defaultQueueHandle, &data, &token);
-  	}
+  	uint16_t data = GPIO_Pin;
+  	xQueueSendToBackFromISR(auxQueueHandle, &data, &token);
 }
 
 
@@ -555,26 +565,42 @@ void defaultTaskFxn(void const * argument)
 
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+  /*
+	 Lone button: 32
+	 RE Button: 16
+	 Rotary encoder cw: 1024, 256 ?????
+	 Rotary encoder acw:
+	 * */
 
-	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
-	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+	//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
+	//HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
   for(;;)
   {
-	//uint16_t button = 13;
     uint16_t data = 0;
 	xQueueReceive(defaultQueueHandle, &data, portMAX_DELAY);
-	if(data == 1) {
+	if(data != 0 && data!= 1024 && data!= 256) {
 		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_SET);
-		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 4000);
-		osDelay(100);
-		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
+		//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 4000);
+		osDelay(50);
+		//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
 		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_RESET);
 
-		int i = 1;
-		unsigned char text[10];
-		snprintf(text, 10, "Val: %i, aaaaaaa", i);
+		unsigned char text[15];
+		snprintf(text, 15, "Port: %i.", data);
 		HAL_UART_Transmit(&huart2, text
-		,sizeof(text) ,1);
+						  ,sizeof(text) ,1);
+	}
+	else if(data == 1024){
+		unsigned char text[] = "left";
+		HAL_UART_Transmit(&huart2, text
+						  ,sizeof(text) ,1);
+		osDelay(50);
+	}
+	else if(data == 256){
+		unsigned char text[] = "right";
+		HAL_UART_Transmit(&huart2, text
+						  ,sizeof(text) ,1);
+		osDelay(50);
 	}
     osDelay(1);
   }
@@ -591,10 +617,63 @@ void defaultTaskFxn(void const * argument)
 void auxTaskFxn(void const * argument)
 {
   /* USER CODE BEGIN auxTaskFxn */
+	uint16_t db_button0 = 0;
+	uint16_t db_button1 = 0;
+	uint16_t db_rot1 = 0;
+	uint16_t db_rot2 = 0;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	uint16_t button = 0;
+	xQueueReceive(auxQueueHandle, &button, 0);
+	switch(button) {
+		case 16:{
+			if(db_button0 == 0) {
+				db_button0 = 500;
+				xQueueSend(defaultQueueHandle, &button, 0);
+			}
+			break;
+		}
+		case 32:{
+			if(db_button1 == 0) {
+				db_button1 = 500;
+				xQueueSend(defaultQueueHandle, &button, 0);
+			}
+			break;
+		}
+		case 1024:{
+			if(db_rot1 == 0) {
+				db_rot1 = 100;
+				if(db_rot2 > 0){
+					xQueueSend(defaultQueueHandle, &button, 0);
+				}
+			}
+			break;
+		}
+		case 256:{
+			if(db_rot2 == 0) {
+				db_rot2 = 100;
+				if(db_rot1 > 0){
+					xQueueSend(defaultQueueHandle, &button, 0);
+				}
+			}
+			break;
+		}
+	}
+	if(db_button0 > 0) {
+		db_button0 = db_button0 - 1;
+	}
+	if(db_button1 > 0) {
+		db_button1 = db_button1 - 1;
+	}
+	if(db_rot1 > 0) {
+		db_rot1 = db_rot1 - 1;
+	}
+	if(db_rot2 > 0) {
+		db_rot2 = db_rot2 - 1;
+	}
+    vTaskDelay(1);
+	//osDelay(1);
   }
   /* USER CODE END auxTaskFxn */
 }

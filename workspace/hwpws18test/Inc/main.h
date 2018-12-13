@@ -68,14 +68,24 @@
 #define USART_RX_GPIO_Port GPIOA
 #define LED_BOARD_Pin GPIO_PIN_5
 #define LED_BOARD_GPIO_Port GPIOA
+#define rotary_left_Pin GPIO_PIN_10
+#define rotary_left_GPIO_Port GPIOB
+#define rotary_left_EXTI_IRQn EXTI15_10_IRQn
+#define rotaty_right_Pin GPIO_PIN_8
+#define rotaty_right_GPIO_Port GPIOA
+#define rotaty_right_EXTI_IRQn EXTI9_5_IRQn
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define btn0_Pin GPIO_PIN_4
+#define btn0_GPIO_Port GPIOB
+#define btn0_EXTI_IRQn EXTI4_IRQn
 #define btn1_Pin GPIO_PIN_5
 #define btn1_GPIO_Port GPIOB
+#define btn1_EXTI_IRQn EXTI9_5_IRQn
 
 /* ########################## Assert Selection ############################## */
 /**
