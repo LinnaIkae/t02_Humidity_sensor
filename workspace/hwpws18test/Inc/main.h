@@ -62,10 +62,16 @@
 #define BLUE_BUTTON_Pin GPIO_PIN_13
 #define BLUE_BUTTON_GPIO_Port GPIOC
 #define BLUE_BUTTON_EXTI_IRQn EXTI15_10_IRQn
+#define hum_out_Pin GPIO_PIN_0
+#define hum_out_GPIO_Port GPIOC
+#define temp_out_Pin GPIO_PIN_1
+#define temp_out_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
+#define contrast_Pin GPIO_PIN_4
+#define contrast_GPIO_Port GPIOA
 #define LED_BOARD_Pin GPIO_PIN_5
 #define LED_BOARD_GPIO_Port GPIOA
 #define rotary_left_Pin GPIO_PIN_10
@@ -86,6 +92,10 @@
 #define btn1_Pin GPIO_PIN_5
 #define btn1_GPIO_Port GPIOB
 #define btn1_EXTI_IRQn EXTI9_5_IRQn
+#define PWM_sensor_Pin GPIO_PIN_7
+#define PWM_sensor_GPIO_Port GPIOB
+#define PWM_brightness_Pin GPIO_PIN_8
+#define PWM_brightness_GPIO_Port GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**

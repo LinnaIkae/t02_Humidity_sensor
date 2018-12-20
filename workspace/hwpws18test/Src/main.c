@@ -58,11 +58,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 
 DAC_HandleTypeDef hdac1;
 
 OPAMP_HandleTypeDef hopamp2;
 
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim16;
 
 UART_HandleTypeDef huart2;
@@ -95,11 +97,14 @@ static void MX_OPAMP2_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM4_Init(void);
+static void MX_ADC2_Init(void);
 void defaultTaskFxn(void const * argument);
 void auxTaskFxn(void const * argument);
 void timer01Callback(void const * argument);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
                                 
 
 /* USER CODE BEGIN PFP */
@@ -145,6 +150,8 @@ int main(void)
   MX_TIM16_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
+  MX_TIM4_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -328,13 +335,56 @@ static void MX_ADC1_Init(void)
 
     /**Configure Regular Channel 
     */
-  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
+/* ADC2 init function */
+static void MX_ADC2_Init(void)
+{
+
+  ADC_ChannelConfTypeDef sConfig;
+
+    /**Common config 
+    */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc2.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc2.Init.LowPowerAutoWait = DISABLE;
+  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.NbrOfConversion = 1;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.DMAContinuousRequests = DISABLE;
+  hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc2.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure Regular Channel 
+    */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -387,6 +437,44 @@ static void MX_OPAMP2_Init(void)
 
 }
 
+/* TIM4 init function */
+static void MX_TIM4_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 190;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 55;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim4);
+
+}
+
 /* TIM16 init function */
 static void MX_TIM16_Init(void)
 {
@@ -397,7 +485,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 0;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 0;
+  htim16.Init.Period = 8000;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -412,7 +500,7 @@ static void MX_TIM16_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 4000;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -566,43 +654,78 @@ void defaultTaskFxn(void const * argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   /*
-	 Lone button: 32
-	 RE Button: 16
-	 Rotary encoder cw: 1024, 256 ?????
-	 Rotary encoder acw:
-	 * */
+*/
 
-	//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
-	//HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+	uint16_t data = 0;
+	uint16_t contrast = 0; //contrast 0-4096
+	uint16_t brightness = 4000;
+	uint32_t result1 = 0;
+	uint32_t result2 = 0;
+	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+
   for(;;)
   {
-    uint16_t data = 0;
-	xQueueReceive(defaultQueueHandle, &data, portMAX_DELAY);
-	if(data != 0 && data!= 1024 && data!= 256) {
-		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_SET);
-		//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 4000);
-		osDelay(50);
-		//HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
-		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_RESET);
 
-		unsigned char text[15];
-		snprintf(text, 15, "Port: %i.", data);
-		HAL_UART_Transmit(&huart2, text
-						  ,sizeof(text) ,1);
+	xQueueReceive(defaultQueueHandle, &data, portMAX_DELAY);
+
+	unsigned char text[25] = "";
+	switch (data) {
+		case 1024: //rotary encoder left
+			snprintf(text, 15, "Left");
+			contrast = (contrast > 0)? contrast-500:contrast;
+			contrast = (contrast < 0)? 0:contrast;
+			break;
+
+		case 256: //rotary encoder right
+			snprintf(text, 15, "Right");
+			contrast = (contrast < 4000)? contrast+500:contrast;
+			contrast = (contrast > 4000)? 4000:contrast;
+			break;
+
+		case 16: // button on rotary encoder
+			//snprintf(text, 15, "Port: %i.", data);
+			brightness -= 1000;
+			__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+			HAL_ADC_Start(&hadc1);
+			HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
+			while(status == HAL_BUSY) {
+			}
+			result1 = HAL_ADC_GetValue(&hadc1);
+
+			HAL_ADC_Start(&hadc2);
+
+			status = HAL_ADC_PollForConversion(&hadc2, 100);
+			while(status == HAL_BUSY) {
+			}
+			result2 = HAL_ADC_GetValue(&hadc2);
+
+			snprintf(text, 25, "Hum:%i, Temp: %i", result1, result2);
+			break;
+
+		case 32: // button
+			snprintf(text, 15, "Port: %i.", data);
+			brightness += 1000;
+			__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+				break;
+		default:
+			break;
 	}
-	else if(data == 1024){
-		unsigned char text[] = "left";
-		HAL_UART_Transmit(&huart2, text
-						  ,sizeof(text) ,1);
-		osDelay(50);
-	}
-	else if(data == 256){
-		unsigned char text[] = "right";
-		HAL_UART_Transmit(&huart2, text
-						  ,sizeof(text) ,1);
-		osDelay(50);
-	}
-    osDelay(1);
+
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, contrast);
+
+	HAL_UART_Transmit(&huart2, text,
+					  sizeof(text) ,1);
+	osDelay(10);
+//	if(data != 0 && data!= 1024 && data!= 256) {
+//		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_SET);
+//		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 4000);
+//		osDelay(50);
+//		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
+//		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_RESET);
+//	}
   }
   /* USER CODE END 5 */ 
 }
