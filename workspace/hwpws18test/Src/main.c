@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -53,7 +53,7 @@
 
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-
+#include "tm_stm32_hd44780.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -61,8 +61,6 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 
 DAC_HandleTypeDef hdac1;
-
-OPAMP_HandleTypeDef hopamp2;
 
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim16;
@@ -93,7 +91,6 @@ osStaticTimerDef_t timer01ControlBlock;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DAC1_Init(void);
-static void MX_OPAMP2_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
@@ -146,7 +143,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DAC1_Init();
-  MX_OPAMP2_Init();
   MX_TIM16_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
@@ -419,24 +415,6 @@ static void MX_DAC1_Init(void)
 
 }
 
-/* OPAMP2 init function */
-static void MX_OPAMP2_Init(void)
-{
-
-  hopamp2.Instance = OPAMP2;
-  hopamp2.Init.PowerSupplyRange = OPAMP_POWERSUPPLY_LOW;
-  hopamp2.Init.Mode = OPAMP_STANDALONE_MODE;
-  hopamp2.Init.NonInvertingInput = OPAMP_NONINVERTINGINPUT_IO0;
-  hopamp2.Init.InvertingInput = OPAMP_INVERTINGINPUT_IO0;
-  hopamp2.Init.PowerMode = OPAMP_POWERMODE_NORMAL;
-  hopamp2.Init.UserTrimming = OPAMP_TRIMMING_FACTORY;
-  if (HAL_OPAMP_Init(&hopamp2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
 /* TIM4 init function */
 static void MX_TIM4_Init(void)
 {
@@ -568,11 +546,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_BOARD_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
-                          |GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, D3_Pin|D4_Pin|D5_Pin|GPIO_PIN_9 
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, D2_Pin|D0_Pin|GPIO_PIN_7|RS_Pin 
+                          |LCD_EN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, D6_Pin|D7_Pin|D1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BLUE_BUTTON_Pin */
   GPIO_InitStruct.Pin = BLUE_BUTTON_Pin;
@@ -580,17 +562,31 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BLUE_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_BOARD_Pin PA9 PA10 PA11 
-                           PA12 */
-  GPIO_InitStruct.Pin = LED_BOARD_Pin|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
-                          |GPIO_PIN_12;
+  /*Configure GPIO pin : D3_Pin */
+  GPIO_InitStruct.Pin = D3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(D3_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : D4_Pin D5_Pin PA9 PA10 
+                           PA11 PA12 */
+  GPIO_InitStruct.Pin = D4_Pin|D5_Pin|GPIO_PIN_9|GPIO_PIN_10 
+                          |GPIO_PIN_11|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB1 PB12 PB14 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_12|GPIO_PIN_14;
+  /*Configure GPIO pins : D2_Pin D0_Pin */
+  GPIO_InitStruct.Pin = D2_Pin|D0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -601,8 +597,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PC6 PC7 PC8 PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
+  /*Configure GPIO pins : D6_Pin D7_Pin */
+  GPIO_InitStruct.Pin = D6_Pin|D7_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC7 RS_Pin LCD_EN_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_7|RS_Pin|LCD_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -613,6 +616,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(rotaty_right_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : D1_Pin */
+  GPIO_InitStruct.Pin = D1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(D1_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
@@ -658,13 +668,14 @@ void defaultTaskFxn(void const * argument)
 
 
 	uint16_t data = 0;
-	uint16_t contrast = 0; //contrast 0-4096
-	uint16_t brightness = 4000;
+	uint16_t contrast = 992; //contrast 0-4096
+	uint16_t brightness = 3000;
 	uint32_t result1 = 0;
 	uint32_t result2 = 0;
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+
 
   for(;;)
   {
@@ -675,20 +686,25 @@ void defaultTaskFxn(void const * argument)
 	switch (data) {
 		case 1024: //rotary encoder left
 			snprintf(text, 15, "Left");
-			contrast = (contrast > 0)? contrast-500:contrast;
+			contrast = (contrast > 0)? contrast-200:contrast;
 			contrast = (contrast < 0)? 0:contrast;
 			break;
 
 		case 256: //rotary encoder right
 			snprintf(text, 15, "Right");
-			contrast = (contrast < 4000)? contrast+500:contrast;
+			contrast = (contrast < 4000)? contrast+200:contrast;
 			contrast = (contrast > 4000)? 4000:contrast;
 			break;
 
 		case 16: // button on rotary encoder
+
+			TM_HD44780_Init(16, 2);
+			TM_HD44780_Puts(1, 1, "AAAAA");
+			TM_HD44780_Puts(5, 1, "BBBB");
+
 			//snprintf(text, 15, "Port: %i.", data);
-			brightness -= 1000;
-			__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+			//brightness -= 1000;
+			//__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
 			HAL_ADC_Start(&hadc1);
 			HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
 			while(status == HAL_BUSY) {
@@ -707,8 +723,8 @@ void defaultTaskFxn(void const * argument)
 
 		case 32: // button
 			snprintf(text, 15, "Port: %i.", data);
-			brightness += 1000;
-			__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+			//brightness += 1000;
+			//__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
 				break;
 		default:
 			break;

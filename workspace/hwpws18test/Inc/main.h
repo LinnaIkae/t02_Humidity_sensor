@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -72,11 +72,25 @@
 #define USART_RX_GPIO_Port GPIOA
 #define contrast_Pin GPIO_PIN_4
 #define contrast_GPIO_Port GPIOA
-#define LED_BOARD_Pin GPIO_PIN_5
-#define LED_BOARD_GPIO_Port GPIOA
+#define D3_Pin GPIO_PIN_5
+#define D3_GPIO_Port GPIOA
+#define D4_Pin GPIO_PIN_6
+#define D4_GPIO_Port GPIOA
+#define D5_Pin GPIO_PIN_7
+#define D5_GPIO_Port GPIOA
+#define D2_Pin GPIO_PIN_5
+#define D2_GPIO_Port GPIOC
 #define rotary_left_Pin GPIO_PIN_10
 #define rotary_left_GPIO_Port GPIOB
 #define rotary_left_EXTI_IRQn EXTI15_10_IRQn
+#define D6_Pin GPIO_PIN_12
+#define D6_GPIO_Port GPIOB
+#define D0_Pin GPIO_PIN_6
+#define D0_GPIO_Port GPIOC
+#define RS_Pin GPIO_PIN_8
+#define RS_GPIO_Port GPIOC
+#define LCD_EN_Pin GPIO_PIN_9
+#define LCD_EN_GPIO_Port GPIOC
 #define rotaty_right_Pin GPIO_PIN_8
 #define rotaty_right_GPIO_Port GPIOA
 #define rotaty_right_EXTI_IRQn EXTI9_5_IRQn
@@ -92,10 +106,14 @@
 #define btn1_Pin GPIO_PIN_5
 #define btn1_GPIO_Port GPIOB
 #define btn1_EXTI_IRQn EXTI9_5_IRQn
+#define D7_Pin GPIO_PIN_6
+#define D7_GPIO_Port GPIOB
 #define PWM_sensor_Pin GPIO_PIN_7
 #define PWM_sensor_GPIO_Port GPIOB
 #define PWM_brightness_Pin GPIO_PIN_8
 #define PWM_brightness_GPIO_Port GPIOB
+#define D1_Pin GPIO_PIN_9
+#define D1_GPIO_Port GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**

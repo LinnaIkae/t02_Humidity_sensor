@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -236,67 +236,6 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
   /* USER CODE BEGIN DAC1_MspDeInit 1 */
 
   /* USER CODE END DAC1_MspDeInit 1 */
-  }
-
-}
-
-void HAL_OPAMP_MspInit(OPAMP_HandleTypeDef* hopamp)
-{
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if(hopamp->Instance==OPAMP2)
-  {
-  /* USER CODE BEGIN OPAMP2_MspInit 0 */
-
-  /* USER CODE END OPAMP2_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_OPAMP_CLK_ENABLE();
-  
-    /**OPAMP2 GPIO Configuration    
-    PA6     ------> OPAMP2_VINP
-    PA7     ------> OPAMP2_VINM
-    PB0     ------> OPAMP2_VOUT 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN OPAMP2_MspInit 1 */
-
-  /* USER CODE END OPAMP2_MspInit 1 */
-  }
-
-}
-
-void HAL_OPAMP_MspDeInit(OPAMP_HandleTypeDef* hopamp)
-{
-
-  if(hopamp->Instance==OPAMP2)
-  {
-  /* USER CODE BEGIN OPAMP2_MspDeInit 0 */
-
-  /* USER CODE END OPAMP2_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_OPAMP_CLK_DISABLE();
-  
-    /**OPAMP2 GPIO Configuration    
-    PA6     ------> OPAMP2_VINP
-    PA7     ------> OPAMP2_VINM
-    PB0     ------> OPAMP2_VOUT 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_6|GPIO_PIN_7);
-
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
-
-  /* USER CODE BEGIN OPAMP2_MspDeInit 1 */
-
-  /* USER CODE END OPAMP2_MspDeInit 1 */
   }
 
 }
