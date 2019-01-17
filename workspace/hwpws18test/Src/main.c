@@ -315,7 +315,11 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc1.Init.OversamplingMode = DISABLE;
+  hadc1.Init.OversamplingMode = ENABLE;
+  hadc1.Init.Oversampling.Ratio = ADC_OVERSAMPLING_RATIO_16;
+  hadc1.Init.Oversampling.RightBitShift = ADC_RIGHTBITSHIFT_NONE;
+  hadc1.Init.Oversampling.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER;
+  hadc1.Init.Oversampling.OversamplingStopReset = ADC_REGOVERSAMPLING_CONTINUED_MODE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -366,7 +370,11 @@ static void MX_ADC2_Init(void)
   hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc2.Init.DMAContinuousRequests = DISABLE;
   hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc2.Init.OversamplingMode = DISABLE;
+  hadc2.Init.OversamplingMode = ENABLE;
+  hadc2.Init.Oversampling.Ratio = ADC_OVERSAMPLING_RATIO_16;
+  hadc2.Init.Oversampling.RightBitShift = ADC_RIGHTBITSHIFT_NONE;
+  hadc2.Init.Oversampling.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER;
+  hadc2.Init.Oversampling.OversamplingStopReset = ADC_REGOVERSAMPLING_CONTINUED_MODE;
   if (HAL_ADC_Init(&hadc2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -551,7 +559,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, D2_Pin|D0_Pin|GPIO_PIN_7|RS_Pin 
-                          |LCD_EN_Pin, GPIO_PIN_RESET);
+                          |LCD_EN_Pin|sensor_enable_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, D6_Pin|D7_Pin|D1_Pin, GPIO_PIN_RESET);
@@ -617,6 +625,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(rotaty_right_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : sensor_enable_Pin */
+  GPIO_InitStruct.Pin = sensor_enable_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(sensor_enable_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : D1_Pin */
   GPIO_InitStruct.Pin = D1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -669,65 +684,139 @@ void defaultTaskFxn(void const * argument)
 
 	uint16_t data = 0;
 	uint16_t contrast = 992; //contrast 0-4096
-	uint16_t brightness = 3000;
-	uint32_t result1 = 0;
-	uint32_t result2 = 0;
+	uint32_t hum = 0;
+	uint32_t temp= 0;
+	uint32_t temp_mV;
+	uint32_t opt_val[10];
+	uint16_t opt_inc[10];
+	uint32_t opt_min[10];
+	uint32_t opt_max[10];
+	unsigned char opt_name[10][16];
+	unsigned char hum_str[16] = "";
+	unsigned char temp_str[16] = "";
+	uint8_t mode = 0;
+	uint8_t opt_sel= 0;
+	uint8_t selected = 0;
+		//mode 0 = show humidity and temp
+		//mode 1 = options menu
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
-
-
+	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); // to brightness
+	HAL_GPIO_WritePin(sensor_enable_GPIO_Port, sensor_enable_Pin, GPIO_PIN_SET);
+	TM_HD44780_Init(16, 2);
   for(;;)
   {
 
-	xQueueReceive(defaultQueueHandle, &data, portMAX_DELAY);
+	  unsigned char text[25] = "";
+	  data = 0;
+	  xQueueReceive(defaultQueueHandle, &data, 500); //portMAX_DELAY not good here?
 
-	unsigned char text[25] = "";
-	switch (data) {
+	  if(mode == 0){
+	  switch (data) {
 		case 1024: //rotary encoder left
+			TM_HD44780_ScrollLeft();
 			snprintf(text, 15, "Left");
-			contrast = (contrast > 0)? contrast-200:contrast;
-			contrast = (contrast < 0)? 0:contrast;
 			break;
 
 		case 256: //rotary encoder right
+			TM_HD44780_ScrollRight();
 			snprintf(text, 15, "Right");
-			contrast = (contrast < 4000)? contrast+200:contrast;
-			contrast = (contrast > 4000)? 4000:contrast;
 			break;
 
 		case 16: // button on rotary encoder
-
-			TM_HD44780_Init(16, 2);
-			TM_HD44780_Puts(1, 1, "AAAAA");
-			TM_HD44780_Puts(5, 1, "BBBB");
-
-			//snprintf(text, 15, "Port: %i.", data);
-			//brightness -= 1000;
-			//__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
-			HAL_ADC_Start(&hadc1);
-			HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
-			while(status == HAL_BUSY) {
-			}
-			result1 = HAL_ADC_GetValue(&hadc1);
-
-			HAL_ADC_Start(&hadc2);
-
-			status = HAL_ADC_PollForConversion(&hadc2, 100);
-			while(status == HAL_BUSY) {
-			}
-			result2 = HAL_ADC_GetValue(&hadc2);
-
-			snprintf(text, 25, "Hum:%i, Temp: %i", result1, result2);
 			break;
 
-		case 32: // button
-			snprintf(text, 15, "Port: %i.", data);
-			//brightness += 1000;
-			//__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+		case 32: // lone button
+			mode = 1;
 				break;
 		default:
 			break;
+	  	}
+
+	    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2); // to sensor
+		osDelay(10);
+		HAL_ADC_Start(&hadc1);
+		HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
+		while(status == HAL_BUSY) {
+		}
+		hum = HAL_ADC_GetValue(&hadc1);
+
+		HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
+		osDelay(10);
+		HAL_ADC_Start(&hadc2);
+		status = HAL_ADC_PollForConversion(&hadc2, 100);
+		while(status == HAL_BUSY) {
+		}
+		temp = HAL_ADC_GetValue(&hadc2);
+		float x = 725.0/812.0;
+		temp_mV = temp * x; // to millivolts
+		if(temp_mV < 500){
+			temp = 111111111; //for debug
+		}
+		else{
+			temp = (temp_mV - 500) / 10;  // to celcius
+		}
+
+		snprintf(hum_str, 16, "Hum: %lu         ", hum);
+		snprintf(temp_str, 16, "Temp: %lu %cC       ", temp, (char)223);
+		TM_HD44780_Puts(0, 0, hum_str);
+		TM_HD44780_Puts(0, 1, temp_str);
+		HAL_UART_Transmit(&huart2, hum_str,
+							  sizeof(hum_str) ,1);
+	}
+
+	else if(mode == 1){
+		//currently shown option is indicated by opt_sel
+		//the value can be changed with rotary if selected = true
+		switch (data) {
+			case 1024: //rotary encoder left
+				if(selected){
+					opt_val[opt_sel] = opt_val[opt_sel] + opt_inc[opt_sel];
+					if(opt_val[opt_sel] > opt_max[opt_sel]){
+						opt_val[opt_sel] = opt_max[opt_sel];
+					}
+				}
+				else{
+					opt_sel = opt_sel - 1;
+					if(opt_sel < 0){
+						opt_sel = 0;
+					}
+				}
+				break;
+
+			case 256: //rotary encoder right
+				if(selected){
+					opt_val[opt_sel] = opt_val[opt_sel] - opt_inc[opt_sel];
+					if(opt_val[opt_sel] < opt_min[opt_sel]){
+						opt_val[opt_sel] = opt_min[opt_sel];
+					}
+				}
+				else{
+					opt_sel = opt_sel + 1;
+					if(opt_sel > 5){ // max_options  = 5?
+						opt_sel = 5;
+					}
+				}
+				break;
+
+			case 16: // button on rotary encoder
+				selected = (selected == 1 ? 0: 1); //toggle
+				TM_HD44780_BlinkOn();
+				break;
+
+			case 32: // lone button
+				mode = 0;
+				opt_sel = 0;
+				break;
+			default:
+				break;
+		}
+
+		unsigned char lcd_top[16] = "";
+		unsigned char lcd_bot[16] = "";
+		snprintf(lcd_top, 16, "%s %lu             ", opt_name[opt_sel], opt_val[opt_sel]);
+		snprintf(lcd_bot, 16, "%s %lu             ", opt_name[opt_sel+1], opt_val[opt_sel]);
+		TM_HD44780_Puts(0, 0, lcd_top);
+		TM_HD44780_Puts(0, 1, lcd_bot);
 	}
 
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, contrast);
@@ -735,13 +824,6 @@ void defaultTaskFxn(void const * argument)
 	HAL_UART_Transmit(&huart2, text,
 					  sizeof(text) ,1);
 	osDelay(10);
-//	if(data != 0 && data!= 1024 && data!= 256) {
-//		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_SET);
-//		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 4000);
-//		osDelay(50);
-//		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0);
-//		HAL_GPIO_WritePin(LED_BOARD_GPIO_Port, LED_BOARD_Pin, GPIO_PIN_RESET);
-//	}
   }
   /* USER CODE END 5 */ 
 }
@@ -756,11 +838,17 @@ void defaultTaskFxn(void const * argument)
 void auxTaskFxn(void const * argument)
 {
   /* USER CODE BEGIN auxTaskFxn */
+
+	// Handles the interrupts from the inputs and performs debouncing before
+	// sending the data on to the default task queue.
+
 	uint16_t db_button0 = 0;
 	uint16_t db_button1 = 0;
 	uint16_t db_rot1 = 0;
 	uint16_t db_rot2 = 0;
-  /* Infinite loop */
+	uint16_t pr_rot1 = 0; // task ticks since the last rot1 trigger
+	uint16_t pr_rot2 = 0;
+
   for(;;)
   {
 	uint16_t button = 0;
@@ -768,31 +856,33 @@ void auxTaskFxn(void const * argument)
 	switch(button) {
 		case 16:{
 			if(db_button0 == 0) {
-				db_button0 = 500;
+				db_button0 = 200;
 				xQueueSend(defaultQueueHandle, &button, 0);
 			}
 			break;
 		}
 		case 32:{
 			if(db_button1 == 0) {
-				db_button1 = 500;
+				db_button1 = 200;
 				xQueueSend(defaultQueueHandle, &button, 0);
-			}
-			break;
-		}
-		case 1024:{
-			if(db_rot1 == 0) {
-				db_rot1 = 100;
-				if(db_rot2 > 0){
-					xQueueSend(defaultQueueHandle, &button, 0);
-				}
 			}
 			break;
 		}
 		case 256:{
 			if(db_rot2 == 0) {
-				db_rot2 = 100;
-				if(db_rot1 > 0){
+				db_rot2 = 200;
+				pr_rot2 = 0;
+				if(pr_rot1 < 50){
+					xQueueSend(defaultQueueHandle, &button, 0);
+				}
+			}
+			break;
+		}
+		case 1024:{
+			if(db_rot1 == 0) {
+				db_rot1 = 200;
+				pr_rot1 = 0;
+				if(pr_rot2 < 50){
 					xQueueSend(defaultQueueHandle, &button, 0);
 				}
 			}
@@ -811,8 +901,9 @@ void auxTaskFxn(void const * argument)
 	if(db_rot2 > 0) {
 		db_rot2 = db_rot2 - 1;
 	}
+	pr_rot1 += 1;
+	pr_rot2 += 1;
     vTaskDelay(1);
-	//osDelay(1);
   }
   /* USER CODE END auxTaskFxn */
 }
