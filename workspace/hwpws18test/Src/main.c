@@ -323,7 +323,11 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc1.Init.OversamplingMode = DISABLE;
+  hadc1.Init.OversamplingMode = ENABLE;
+  hadc1.Init.Oversampling.Ratio = ADC_OVERSAMPLING_RATIO_16;
+  hadc1.Init.Oversampling.RightBitShift = ADC_RIGHTBITSHIFT_NONE;
+  hadc1.Init.Oversampling.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER;
+  hadc1.Init.Oversampling.OversamplingStopReset = ADC_REGOVERSAMPLING_CONTINUED_MODE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -439,7 +443,7 @@ static void MX_TIM4_Init(void)
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim4.Init.Period = 190;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -687,7 +691,10 @@ void defaultTaskFxn(void const * argument)
 #define NUM_OPT 6
 
 	uint16_t data = 0;
-	uint16_t contrast = 992; //contrast 0-4096
+	uint32_t contrast = 992; //contrast 0-4096
+	uint32_t brightness = 4000;
+	uint32_t sens_pwm_counter;
+	uint32_t sens_pwm_compare;
 	uint32_t hum = 0;
 	uint32_t hum_l = 0;
 	uint32_t hum_r = 0;
@@ -698,11 +705,11 @@ void defaultTaskFxn(void const * argument)
 
 	//Option = {"name", value, incr, min, max}
 	struct Option opt_list[NUM_OPT] = {
-			{"brightn", 200, 20, 0, 2000},
-			{"contrst", 0, 10, 0, 10000},
+			{"brightn", 4000, 100, 0, 4096},
+			{"contrst", 992, 100, 0, 4096},
 			{"timeout", 10000, 2, 900, 10010},
-			{"s pwm f", 10000, 2, 900, 10010},
-			{"s pwm D", 10000, 2, 900, 10010},
+			{"s pwm f", 250000, 5000, 200000, 500000}, //sensor pwm frequency
+			{"s pwm D", 15, 2, 0, 100}, //sensor pwm duty cycle 0-100%
 			{"f reset", 10000, 2, 900, 10010}
 	};
 
@@ -714,6 +721,7 @@ void defaultTaskFxn(void const * argument)
 
 	unsigned char hum_str[16] = "";
 	unsigned char temp_str[16] = "";
+
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); // to brightness
 	HAL_GPIO_WritePin(sensor_enable_GPIO_Port, sensor_enable_Pin, GPIO_PIN_SET);
@@ -740,6 +748,7 @@ void defaultTaskFxn(void const * argument)
 
 			case 32: // lone button
 				mode = 1;
+				selected = 0;
 				break;
 			default:
 				break;
@@ -751,8 +760,9 @@ void defaultTaskFxn(void const * argument)
 			HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
 			while(status == HAL_BUSY) {
 			}
+			osDelay(10);
 			hum = HAL_ADC_GetValue(&hadc1);
-			hum = hum;// NO compensation for oversampling
+			hum = hum / 16;// compensation for oversampling
 			HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
 			hum_l = hum / 100;
 			hum_r = hum - hum_l * 100;
@@ -776,7 +786,7 @@ void defaultTaskFxn(void const * argument)
 			temp_l = temp / 10; //left side
 			temp_r = temp - temp_l*10; //right side, after decimal point
 
-			snprintf(hum_str, 16, "Hum: %lu.%lu         ", (unsigned long)hum_l, (unsigned long)hum_r);
+			snprintf(hum_str, 16, "Hum:  %lu.%lu         ", (unsigned long)hum_l, (unsigned long)hum_r);
 			snprintf(temp_str, 16, "Temp: %lu.%lu %cC       ", (unsigned long)temp_l, (unsigned long)temp_r, (char)223);
 			TM_HD44780_Puts(0, 0, hum_str);
 			TM_HD44780_Puts(0, 1, temp_str);
@@ -867,7 +877,21 @@ void defaultTaskFxn(void const * argument)
 			TM_HD44780_Puts(0, 1, lcd_bot);
 		}
 
+		brightness = opt_list[0].value;
+		contrast  = opt_list[1].value;
 		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, contrast);
+		__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
+
+		//setting sensor pwm options
+		float divisor = opt_list[3].value * 1.25; //kHz * ns = 10^-6
+		float counterf = 100000000.0 / divisor;
+		sens_pwm_counter = counterf; // 1/(kHz * us)
+		sens_pwm_compare = (opt_list[4].value * sens_pwm_counter) / 100;
+
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, sens_pwm_compare);
+		__HAL_TIM_SET_AUTORELOAD(&htim4, sens_pwm_counter);
+		//HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2);
+		//HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 
 		HAL_UART_Transmit(&huart2, text,
 				sizeof(text) ,1);
