@@ -664,6 +664,9 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+uint8_t db_button1_block = 0;
+uint8_t db_button2_block = 0;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	BaseType_t token = pdFALSE;
@@ -688,7 +691,7 @@ void defaultTaskFxn(void const * argument)
 	/* Infinite loop */
 	/*
 	 */
-#define NUM_OPT 6
+#define NUM_OPT 4
 
 	uint16_t data = 0;
 	uint32_t contrast = 992; //contrast 0-4096
@@ -707,10 +710,8 @@ void defaultTaskFxn(void const * argument)
 	struct Option opt_list[NUM_OPT] = {
 			{"brightn", 4000, 100, 0, 4096},
 			{"contrst", 992, 100, 0, 4096},
-			{"timeout", 10000, 2, 900, 10010},
 			{"s pwm f", 250000, 5000, 200000, 500000}, //sensor pwm frequency
-			{"s pwm D", 15, 2, 0, 100}, //sensor pwm duty cycle 0-100%
-			{"f reset", 10000, 2, 900, 10010}
+			{"s pwm D", 15, 2, 0, 100} //sensor pwm duty cycle 0-100%
 	};
 
 	//mode = 0: show humidity and temp
@@ -721,6 +722,9 @@ void defaultTaskFxn(void const * argument)
 
 	unsigned char hum_str[16] = "";
 	unsigned char temp_str[16] = "";
+
+
+
 
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); // to brightness
@@ -786,8 +790,14 @@ void defaultTaskFxn(void const * argument)
 			temp_l = temp / 10; //left side
 			temp_r = temp - temp_l*10; //right side, after decimal point
 
+
 			snprintf(hum_str, 16, "Hum:  %lu.%lu         ", (unsigned long)hum_l, (unsigned long)hum_r);
-			snprintf(temp_str, 16, "Temp: %lu.%lu %cC       ", (unsigned long)temp_l, (unsigned long)temp_r, (char)223);
+			if(temp == 111111111){
+				snprintf(temp_str, 16, "Temp: No reading!       ");
+			}
+			else{
+				snprintf(temp_str, 16, "Temp: %lu.%lu %cC       ", (unsigned long)temp_l, (unsigned long)temp_r, (char)223);
+			}
 			TM_HD44780_Puts(0, 0, hum_str);
 			TM_HD44780_Puts(0, 1, temp_str);
 			HAL_UART_Transmit(&huart2, hum_str,
@@ -883,10 +893,10 @@ void defaultTaskFxn(void const * argument)
 		__HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, brightness);
 
 		//setting sensor pwm options
-		float divisor = opt_list[3].value * 1.25; //kHz * ns = 10^-6
+		float divisor = opt_list[2].value * 1.25; //kHz * ns = 10^-6
 		float counterf = 100000000.0 / divisor;
 		sens_pwm_counter = counterf; // 1/(kHz * us)
-		sens_pwm_compare = (opt_list[4].value * sens_pwm_counter) / 100;
+		sens_pwm_compare = (opt_list[3].value * sens_pwm_counter) / 100;
 
 		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, sens_pwm_compare);
 		__HAL_TIM_SET_AUTORELOAD(&htim4, sens_pwm_counter);
@@ -921,6 +931,13 @@ void auxTaskFxn(void const * argument)
 	uint16_t pr_rot1 = 0; // task ticks since the last rot1 trigger
 	uint16_t pr_rot2 = 0;
 
+	uint16_t pr_max = 100;
+	uint16_t db_max = 30;
+
+	int8_t direction = -1;
+	uint16_t direction_timeout = 0;
+	uint16_t direction_timeout_max = 100;
+
 	for(;;)
 	{
 		uint16_t button = 0;
@@ -940,21 +957,25 @@ void auxTaskFxn(void const * argument)
 			}
 			break;
 		}
-		case 256:{
-			if(db_rot2 == 0) {
-				db_rot2 = 200;
-				pr_rot2 = 0;
-				if(pr_rot1 < 50){
+		case 1024:{
+			if(db_rot1 == 0) {
+				db_rot1 = db_max;
+				pr_rot1 = 0;
+				if(pr_rot2 < pr_max && (direction == -1 || direction == 0)){
+					direction = 0;
+					direction_timeout = direction_timeout_max;
 					xQueueSend(defaultQueueHandle, &button, 0);
 				}
 			}
 			break;
-		}
-		case 1024:{
-			if(db_rot1 == 0) {
-				db_rot1 = 200;
-				pr_rot1 = 0;
-				if(pr_rot2 < 50){
+			}
+		case 256:{
+			if(db_rot2 == 0) {
+				db_rot2 = db_max;
+				pr_rot2 = 0;
+				if(pr_rot1 < pr_max && (direction == -1 || direction == 1)){
+					direction = 1;
+					direction_timeout = direction_timeout_max;
 					xQueueSend(defaultQueueHandle, &button, 0);
 				}
 			}
@@ -973,8 +994,18 @@ void auxTaskFxn(void const * argument)
 		if(db_rot2 > 0) {
 			db_rot2 = db_rot2 - 1;
 		}
-		pr_rot1 += 1;
-		pr_rot2 += 1;
+		if(direction_timeout > 0) {
+			direction_timeout = direction_timeout - 1;
+		}
+		if(pr_rot1 < pr_max) {
+			pr_rot1 = pr_rot1 + 1;
+		}
+		if(pr_rot2 < pr_max) {
+			pr_rot2 = pr_rot2 + 1;
+		}
+		if(direction_timeout == 0) {
+			direction = -1;
+		}
 		vTaskDelay(1);
 	}
   /* USER CODE END auxTaskFxn */
@@ -1019,7 +1050,7 @@ void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	while(1)
+	while(0)
 	{
 	}
   /* USER CODE END Error_Handler_Debug */
